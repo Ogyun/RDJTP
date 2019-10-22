@@ -138,16 +138,20 @@ namespace Assignment3
                                     Category c = System.Text.Json.JsonSerializer.Deserialize<Category>(r.Body, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
                                     string[] strList = r.Path.Split("/");
 
-                                    categoryService.UpdateCategory(strList[3], c);
-                                    if (categoryService.UpdateCategory(strList[3], c) == null)
+                                    if (strList.ElementAtOrDefault(3) != null)
                                     {
-                                        responseObject.Status = "5 not found";
-                                    }
-                                    else
-                                    {
-                                        responseObject.Status = "3 updated";
-                                        responseObject.Body = CategoryService.ToJson(categoryService.UpdateCategory(strList[3], c));
-                                    }                                   
+                                        if (categoryService.UpdateCategory(strList[3], c) == null)
+                                        {
+                                            responseObject.Status = "5 not found";
+                                        }
+                                        else
+                                        {
+                                            categoryService.UpdateCategory(strList[3], c);
+                                            responseObject.Status = "3 updated";
+                                            responseObject.Body = CategoryService.ToJson(categoryService.UpdateCategory(strList[3], c));
+                                        }
+                                    } 
+                                                          
                                  
                                 }
                                 if (r.Method =="create" && String.IsNullOrEmpty(r.Body) == false && IsValidJson(r.Body) && r.Path == "/api/categories")
@@ -169,11 +173,12 @@ namespace Assignment3
                                 responseObject.Body = CategoryService.ToJson(categories);
                             }
                             
-                            if (r.Method == "read" && r.Path.Any(char.IsDigit))
+                            if (r.Method == "read" && isValidPath(r.Path,r.Method))
                             {
-                                string[] strList = r.Path.Split("/");                               
+                                string[] strList = r.Path.Split("/");                              
                                 CategoryService categoryService = new CategoryService();
                                 var category = categoryService.GetCategoryByID(strList[3]);
+                                
                                 if (category == null)
                                 {
                                     responseObject.Status = "5 not found";
@@ -185,9 +190,19 @@ namespace Assignment3
                                 
                                 responseObject.Body = CategoryService.ToJson(category);
                             }
-                            if (r.Method == "delete")
-                            {
-
+                            if (r.Method == "delete" && isValidPath(r.Path, r.Method))
+                            {                               
+                                string[] strList = r.Path.Split("/");
+                                CategoryService categoryService = new CategoryService();
+                                var categoryToDelete = categoryService.DeleteCategory(strList[3]);
+                                if (categoryToDelete == null)
+                                {
+                                    responseObject.Status = "5 not found";
+                                }
+                                else
+                                {
+                                    responseObject.Status = "1 Ok";
+                                }
                             }
 
                             SendResponse(responseObject, client); 
@@ -271,7 +286,7 @@ namespace Assignment3
         {
             bool valid = false;
 
-            if (String.IsNullOrEmpty(path) == false)
+            if (String.IsNullOrEmpty(path) == false && path.Contains("/"))
             {
                 string[] strList = path.Split("/");
 
@@ -287,13 +302,12 @@ namespace Assignment3
 
                         return false;
                     }
-                }
-
-                if (strList[0] == "api")
+                }               
+                if (strList[1].Equals("api"))
                 {                    
                     valid = true;
 
-                    if (String.IsNullOrEmpty(strList[1]) == false && strList[1] == "categories")
+                    if (strList.ElementAtOrDefault(2) != null && strList[2].Equals("categories"))
                     {
                         valid = true;
                     }
@@ -301,7 +315,7 @@ namespace Assignment3
                     {
                         valid = false;
                     }
-                    if (String.IsNullOrEmpty(strList[2]) == false && checkPathID() == true)
+                    if (strList.ElementAtOrDefault(3) != null && checkPathID() == true)
                     {
                         valid = true;
                     }
@@ -309,7 +323,7 @@ namespace Assignment3
                     {
                         valid = false;
                     }
-                    if (String.IsNullOrEmpty(strList[0]) == false && String.IsNullOrEmpty(strList[1]) == false && strList[0] == "api" && strList[1] == "categories")
+                    if (strList.ElementAtOrDefault(1) != null && strList.ElementAtOrDefault(2) != null && strList[1].Equals("api") && strList[2].Equals("categories"))
                     {
                         valid = true;
                     }
@@ -318,7 +332,7 @@ namespace Assignment3
                         valid = false;
                     }
 
-                    if (String.IsNullOrEmpty(strList[3]))
+                    if (strList.ElementAtOrDefault(3) == null)
                     {
                         if (method=="create")
                         {
@@ -332,14 +346,22 @@ namespace Assignment3
                     }
                     else
                     {
-                        if (method=="read" || method=="update" || method == "delete")
+                        if (checkPathID())
                         {
-                            valid = true;
+                            if (method == "read" || method == "update" || method == "delete")
+                            {
+                                valid = true;
+                            }
+                            else
+                            {
+                                valid = false;
+                            }
                         }
                         else
                         {
                             valid = false;
                         }
+                        
 
                          return valid;
                 }
