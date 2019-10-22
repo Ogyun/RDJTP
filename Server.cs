@@ -132,6 +132,24 @@ namespace Assignment3
                                     responseObject.Body = r.Body;
                                     responseObject.Status = "1 ok";
                                 }
+                                if (r.Method == "update" && String.IsNullOrEmpty(r.Body) == false && IsValidJson(r.Body))
+                                {
+                                    CategoryService categoryService = new CategoryService();
+                                    Category c = System.Text.Json.JsonSerializer.Deserialize<Category>(r.Body, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                                    string[] strList = r.Path.Split("/");
+
+                                    categoryService.UpdateCategory(strList[3], c);
+                                    if (categoryService.UpdateCategory(strList[3], c) == null)
+                                    {
+                                        responseObject.Status = "5 not found";
+                                    }
+                                    else
+                                    {
+                                        responseObject.Status = "3 updated";
+                                        responseObject.Body = CategoryService.ToJson(categoryService.UpdateCategory(strList[3], c));
+                                    }                                   
+                                 
+                                }
                             }
                             if (r.Method == "read" && r.Path == "/api/categories")
                             {
