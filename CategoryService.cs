@@ -42,6 +42,16 @@ namespace Assignment3
             return existingCategory;
         }
 
+        public Category CreateCategory(string name)
+        {
+            int numberOfElements = Categories.Count();
+            Category c = new Category();
+            c.Name = name;
+            c.Id = numberOfElements++;
+            // breaks Request_ReadCategories_StatusOkAndListOfCategoriesInBody
+            //Categories.Add(c);
+            return c;
+        }
         public Category DeleteCategory(string id)
         {
             Category category = GetCategoryByID(id);

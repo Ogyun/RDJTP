@@ -150,6 +150,16 @@ namespace Assignment3
                                     }                                   
                                  
                                 }
+                                if (r.Method =="create" && String.IsNullOrEmpty(r.Body) == false && IsValidJson(r.Body) && r.Path == "/api/categories")
+                                {
+                                    CategoryService categoryService = new CategoryService();
+                                    var newCategory = System.Text.Json.JsonSerializer.Deserialize<Category>(r.Body, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                                    var response = categoryService.CreateCategory(newCategory.Name);
+                                    responseObject.Body = CategoryService.ToJson(response);
+                                    responseObject.Status = "2 Created";
+                                }
+
+
                             }
                             if (r.Method == "read" && r.Path == "/api/categories")
                             {
@@ -174,6 +184,10 @@ namespace Assignment3
                                 }
                                 
                                 responseObject.Body = CategoryService.ToJson(category);
+                            }
+                            if (r.Method == "delete")
+                            {
+
                             }
 
                             SendResponse(responseObject, client); 
