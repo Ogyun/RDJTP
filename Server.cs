@@ -165,30 +165,36 @@ namespace Assignment3
 
 
                             }
-                            if (r.Method == "read" && r.Path == "/api/categories")
-                            {
-                                CategoryService categoryService = new CategoryService();
-                                var categories =  categoryService.GetCategories();
-                                responseObject.Status = "1 Ok";
-                                responseObject.Body = CategoryService.ToJson(categories);
-                            }
+
                             
                             if (r.Method == "read" && isValidPath(r.Path,r.Method))
                             {
-                                string[] strList = r.Path.Split("/");                              
-                                CategoryService categoryService = new CategoryService();
-                                var category = categoryService.GetCategoryByID(strList[3]);
-                                
-                                if (category == null)
+                                if (r.Method == "read" && r.Path == "/api/categories")
                                 {
-                                    responseObject.Status = "5 not found";
+                                    CategoryService categoryService = new CategoryService();
+                                    var categories = categoryService.GetCategories();
+                                    responseObject.Status = "1 Ok";
+                                    responseObject.Body = CategoryService.ToJson(categories);
                                 }
                                 else
                                 {
-                                    responseObject.Status = "1 Ok";
+                                    string[] strList = r.Path.Split("/");
+                                    CategoryService categoryService = new CategoryService();
+                                    var category = categoryService.GetCategoryByID(strList[3]);
+
+                                    if (category == null)
+                                    {
+                                        responseObject.Status = "5 not found";
+                                    }
+                                    else
+                                    {
+                                        responseObject.Status = "1 Ok";
+                                    }
+                                    responseObject.Body = CategoryService.ToJson(category);
                                 }
+                               
                                 
-                                responseObject.Body = CategoryService.ToJson(category);
+                                
                             }
                             if (r.Method == "delete" && isValidPath(r.Path, r.Method))
                             {                               
