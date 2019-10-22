@@ -217,7 +217,7 @@ namespace Assignment3
                         {
                             Console.WriteLine("Not valid json, Request: {0}", request);
                             responseObject.Body = "please make your request in valid json format";
-                            responseObject.Status = "missing resource";
+                            responseObject.Status = "4 Bad Request";
                             SendResponse(responseObject, client);
                         }
                     }
